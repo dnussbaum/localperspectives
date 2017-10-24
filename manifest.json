@@ -5,18 +5,18 @@
   "description": "CHANGE LATER",
   "homepage_url": "https://northwestern.edu",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/ico16.png",
+    "48": "icons/ico48.png",
+    "128": "icons/ico128.png"
   },
   "default_locale": "en",
   "background": {
     "page": "src/bg/background.html",
     "persistent": true
   },
-  "page_action": {
-    "default_icon": "icons/icon19.png",
-    "default_title": "page action demo",
+  "browser_action": {
+    "default_icon": "icons/ico19.png",
+    "default_title": "Local Perspecitves",
     "default_popup": "src/page_action/page_action.html"
   },
   "permissions": [
@@ -36,6 +36,7 @@
         "https://*/*"
       ],
       "js": [
+        "js/jquery-3.2.1.min.js",
         "src/inject/inject.js"
       ]
     }

@@ -4,10 +4,16 @@
 //     "sample_setting": "This is how you use Store.js to remember values"
 // });
 
+var payload;
 
-//example of using a message handler from the inject scripts
-chrome.extension.onMessage.addListener(
-  function(request, sender, sendResponse) {
-  	chrome.pageAction.show(sender.tab.id);
-    sendResponse();
-  });
+chrome.runtime.onMessage.addListener(
+function(request, sender, sendResponse) {
+  console.log(sender.tab ?
+              "from a content script:" + sender.tab.url :
+              "from the extension");
+
+  payload = request.greeting;
+
+  if (request.greeting == "hello")
+    sendResponse({farewell: "recieved"});
+});
