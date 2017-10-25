@@ -1,0 +1,3 @@
+$ brew install libxml2 libxslt
+$ brew install libtiff libjpeg webp little-cms2
+$ pip install newspaper
