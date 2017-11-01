@@ -4,8 +4,12 @@ from aylien_news_api.rest import ApiException
 import pprint
 import geograpy
 from geograpy import places
-import nltk
+from collections import Counter
 
+import nltk
+from nltk.corpus import stopwords
+
+stop_words = set(stopwords.words('english'))
 pp = pprint.PrettyPrinter(indent=4)
 
 # Takes in a URL
@@ -18,6 +22,20 @@ def extract_article_features(url="http://www.cnn.com/2017/10/25/politics/north-k
 
     return (article.title, article.keywords, article.summary, article.text)
 
+
+def extract_key_words(article):
+    words = article.split(" ")
+    words = map(str, words)
+    lower_case = map(str.lower, words)
+    keywords = Counter(lower_case).most_common()
+
+    good_keywords = []
+    for w in keywords:
+        word = w[0]
+        if word not in stop_words:
+            good_keywords.append(word)
+
+    return good_keywords[0:10]
 
 def extract_location_from_text(text):
     #https://stackoverflow.com/questions/40517720/python-geograpy-unable-to-run-demo
@@ -62,10 +80,15 @@ def get_related_stories(headline, text, location):
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
 title, keywords, summary, text = extract_article_features("http://www.businessinsider.com/rahm-emanuel-on-chicago-and-health-tech-2017-9")
+better_keywords = extract_key_words(text)
+
+print(better_keywords)
+print(keywords)
+
 cities_output = extract_location_from_text(text)
 cities = []
 for city in cities_output:
     cities.append(city[0])
-print keywords, cities
+#print keywords, cities
 
 print(get_related_stories(title, text, [cities[0]]))
