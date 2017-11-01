@@ -1,0 +1,5 @@
+newspaper
+aylien_news_api
+geograpy
+nltk
+flask
