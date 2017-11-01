@@ -5,6 +5,7 @@ import pprint
 import geograpy
 from geograpy import places
 import nltk
+from rake_nltk import Rake
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -62,6 +63,11 @@ def get_related_stories(headline, text, location):
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
 title, keywords, summary, text = extract_article_features("http://www.businessinsider.com/rahm-emanuel-on-chicago-and-health-tech-2017-9")
+
+r = Rake()
+
+print(r.extract_keywords_from_text(text))
+
 cities_output = extract_location_from_text(text)
 cities = []
 for city in cities_output:
