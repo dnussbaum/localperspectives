@@ -25,20 +25,18 @@ def extract_article_features(url="http://www.cnn.com/2017/10/25/politics/north-k
 
     return (article.title, article.keywords, article.summary, article.text)
 
-
-def stripx(word):
-    w = word.replace(".", "")
-    w = w.replace(",", "")
-    w = w.replace("'s", "")
-    w = w.replace(";", "")
-    w = w.replace(":", "")
-    w = w.replace("\"", "")
-
-    return w
+def cleanAritlce(article):
+    a = article.replace("\u", "")
+    return a
 
 def extract_key_words(article):
 
     words = article.split()
+    new_words = []
+    for w in words:
+        new_words.append(w.decode('utf-8'))
+
+    words = new_words
     words = map(str, words)
     words = map(stripx, words)
 
@@ -62,7 +60,7 @@ def extract_location_from_text(text):
 
 # Takes in keywords and location
 # returns list of related articles
-def get_related_stories(keywords, text, location):
+def get_related_stories(keywords, text, location, url, headline):
     # Configure API key authorization: app_id
     aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '05d67d01'
     # Configure API key authorization: app_key
@@ -86,20 +84,18 @@ def get_related_stories(keywords, text, location):
     print(keyword_string)
 
     opts = {
-      'sort_by': 'social_shares_count.facebook',
       'language': ['en'],
       'published_at_start': 'NOW-7DAYS',
       'published_at_end': 'NOW',
-      'source_scopes_city': location,
-      'story_body': text,
-      'story_title': "keyword_string"
+      'source_scopes_country': 'US',
+      'story_url': url
     }
 
     try:
         # List stories
-        api_response = api_instance.list_stories(**opts)
+        api_response = api_instance.list_related_stories(**opts)
         stories = []
-        for story in api_response.stories:
+        for story in api_response.related_stories:
           the_story = {
             "title": story.title,
             "url": story.links.permalink,
@@ -111,7 +107,8 @@ def get_related_stories(keywords, text, location):
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-title, keywords, summary, text = extract_article_features("http://www.cnn.com/2017/11/01/politics/cia-osama-bin-laden-release/index.html")
+url = "https://www.japantimes.co.jp/news/2017/11/01/world/politics-diplomacy-world/trump-faults-schumer-diversity-immigration-new-york-city-attack/#.Wfp5H7b-2u4"
+title, keywords, summary, text = extract_article_features(url)
 better_keywords = extract_key_words(text)
 
 cities_output = extract_location_from_text(text)
@@ -121,4 +118,4 @@ for city in cities_output:
 
 print better_keywords, keywords, cities
 
-print(get_related_stories(better_keywords, text, [cities[0]]))
+print(get_related_stories(better_keywords, text, [cities[0]], url, title))
