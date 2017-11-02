@@ -8,8 +8,11 @@ from collections import Counter
 
 import nltk
 from nltk.corpus import stopwords
+from nltk.tag import pos_tag
 
 stop_words = set(stopwords.words('english'))
+additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
 pp = pprint.PrettyPrinter(indent=4)
 
 # Takes in a URL
@@ -23,16 +26,31 @@ def extract_article_features(url="http://www.cnn.com/2017/10/25/politics/north-k
     return (article.title, article.keywords, article.summary, article.text)
 
 
+def stripx(word):
+    w = word.replace(".", "")
+    w = w.replace(",", "")
+    w = w.replace("'s", "")
+    w = w.replace(";", "")
+    w = w.replace(":", "")
+    w = w.replace("\"", "")
+
+    return w
+
 def extract_key_words(article):
-    words = article.split(" ")
+
+    words = article.split()
     words = map(str, words)
-    lower_case = map(str.lower, words)
-    keywords = Counter(lower_case).most_common()
+    words = map(stripx, words)
+
+    #tagged = pos_tag(words)
+    #propernouns = [word for word,pos in tagged if pos == 'NNP']
+
+    keywords = Counter(words).most_common()
 
     good_keywords = []
     for w in keywords:
         word = w[0]
-        if word not in stop_words:
+        if (word.lower() not in stop_words) and (word not in additional_stop_words):
             good_keywords.append(word)
 
     return good_keywords[0:10]
@@ -44,7 +62,7 @@ def extract_location_from_text(text):
 
 # Takes in keywords and location
 # returns list of related articles
-def get_related_stories(headline, text, location):
+def get_related_stories(keywords, text, location):
     # Configure API key authorization: app_id
     aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '05d67d01'
     # Configure API key authorization: app_key
@@ -53,6 +71,20 @@ def get_related_stories(headline, text, location):
     # create an instance of the API class
     api_instance = aylien_news_api.DefaultApi()
 
+    keyword_string = ""
+    length = len(keywords)
+    for i in range(length):
+        k = keywords[i]
+        keyword_string += k
+        if i < 1:
+            keyword_string += " || "
+        else:
+            keyword_string += " || "
+
+
+    keyword_string = keyword_string[:-4]
+    print(keyword_string)
+
     opts = {
       'sort_by': 'social_shares_count.facebook',
       'language': ['en'],
@@ -60,7 +92,7 @@ def get_related_stories(headline, text, location):
       'published_at_end': 'NOW',
       'source_scopes_city': location,
       'story_body': text,
-      'story_title': headline
+      'story_title': "keyword_string"
     }
 
     try:
@@ -79,16 +111,14 @@ def get_related_stories(headline, text, location):
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-title, keywords, summary, text = extract_article_features("http://www.businessinsider.com/rahm-emanuel-on-chicago-and-health-tech-2017-9")
+title, keywords, summary, text = extract_article_features("http://www.cnn.com/2017/11/01/politics/cia-osama-bin-laden-release/index.html")
 better_keywords = extract_key_words(text)
-
-print(better_keywords)
-print(keywords)
 
 cities_output = extract_location_from_text(text)
 cities = []
 for city in cities_output:
     cities.append(city[0])
-#print keywords, cities
 
-print(get_related_stories(title, text, [cities[0]]))
+print better_keywords, keywords, cities
+
+print(get_related_stories(better_keywords, text, [cities[0]]))
