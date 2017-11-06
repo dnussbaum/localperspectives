@@ -11,7 +11,7 @@ from nltk.corpus import stopwords
 from nltk.tag import pos_tag
 
 stop_words = set(stopwords.words('english'))
-additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed"]
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -34,11 +34,11 @@ def extract_key_words(article):
     words = article.split()
     new_words = []
     for w in words:
-        new_words.append(w.decode('utf-8'))
+        new_words.append(w.encode('utf-8'))
 
     words = new_words
     words = map(str, words)
-    words = map(stripx, words)
+    #words = map(stripx, words)
 
     #tagged = pos_tag(words)
     #propernouns = [word for word,pos in tagged if pos == 'NNP']
@@ -56,7 +56,7 @@ def extract_key_words(article):
 def extract_location_from_text(text):
     #https://stackoverflow.com/questions/40517720/python-geograpy-unable-to-run-demo
     places = geograpy.get_place_context(text=text)
-    return places.city_mentions
+    return places.country_mentions
 
 # Takes in keywords and location
 # returns list of related articles
@@ -87,7 +87,7 @@ def get_related_stories(keywords, text, location, url, headline):
       'language': ['en'],
       'published_at_start': 'NOW-7DAYS',
       'published_at_end': 'NOW',
-      'source_scopes_country': 'US',
+      'source_scopes_country': ['US'],
       'story_url': url
     }
 
@@ -111,11 +111,11 @@ url = "https://www.japantimes.co.jp/news/2017/11/01/world/politics-diplomacy-wor
 title, keywords, summary, text = extract_article_features(url)
 better_keywords = extract_key_words(text)
 
-cities_output = extract_location_from_text(text)
-cities = []
-for city in cities_output:
-    cities.append(city[0])
+countries_output = extract_location_from_text(text)
+countries = []
+for country in countries_output:
+    countries.append(country[0])
 
-print better_keywords, keywords, cities
+print better_keywords, keywords, countries
 
-print(get_related_stories(better_keywords, text, [cities[0]], url, title))
+print(get_related_stories(better_keywords, text, [countries[0]], url, title))
