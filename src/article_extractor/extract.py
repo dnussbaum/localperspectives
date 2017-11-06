@@ -3,6 +3,7 @@ import aylien_news_api
 from aylien_news_api.rest import ApiException
 import pprint
 import geograpy
+import pycountry
 from geograpy import places
 from collections import Counter
 
@@ -114,8 +115,9 @@ better_keywords = extract_key_words(text)
 countries_output = extract_location_from_text(text)
 countries = []
 for country in countries_output:
-    countries.append(country[0])
+    isocode = pycountry.countries.get(name=country[0]).alpha_2
+    countries.append(isocode)
 
-print better_keywords, keywords, countries
+#print better_keywords, keywords, countries
 
 print(get_related_stories(better_keywords, text, [countries[0]], url, title))
