@@ -12,7 +12,7 @@ from nltk.corpus import stopwords
 from nltk.tag import pos_tag
 
 stop_words = set(stopwords.words('english'))
-additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed"]
+additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed", "according", "know", "new"]
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -65,6 +65,31 @@ def extract_location_from_text(text):
     places = geograpy.get_place_context(text=text)
     return places.country_mentions
 
+one_word_countries = {
+  "Saudi" : "Saudi Arabia",
+  "Korea": "South Korea",
+  "Emirates" : "United Arab Emirates",
+  "Britian" : "Great Britain"
+}
+
+def searchForCountries(text):
+    countries = dict()
+    words = text.split()
+    for word in words:
+        if word in one_word_countries.keys():
+            if countries.get(word) is None:
+                countries[word] = 0
+            else:
+                countries[word] += 1
+
+    c = countries.keys()
+    toreturn = []
+
+    for country in c:
+        toreturn.append((one_word_countries.get(country), 1))
+
+    return toreturn
+
 # Takes in keywords and location
 # returns list of related articles
 def get_related_stories(location, url):
@@ -78,7 +103,7 @@ def get_related_stories(location, url):
 
     opts = {
       'language': ['en'],
-      'published_at_start': 'NOW-14DAYS',
+      'published_at_start': 'NOW-7DAYS',
       'published_at_end': 'NOW',
       'source_scopes_country': [location],
       'story_url': url
@@ -119,20 +144,30 @@ def get_related_stories(location, url):
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-url = "https://www.thenational.ae/world/gcc/saudi-arabia-arrests-princes-ministers-and-business-figures-in-anti-corruption-crackdown-1.673073"
+url = "http://www.cnn.com/2017/11/04/middleeast/saudi-government-anti-corruption-committee/index.html"
 org_text, org_date, title = extract_article_features(url)
-text = title + " " + title + " " + title + " " + org_text
+text = title + " " + org_text
 
 better_keywords = extract_key_words(text)
 
 countries_output = extract_location_from_text(text)
 
 countries = []
+
+oneword = searchForCountries(text)
+
+if len(oneword) > 0:
+    countries_output += oneword
+
+
 for country in countries_output:
     isocode = pycountry.countries.get(name=country[0]).alpha_2
     countries.append(isocode)
 
-print(countries_output)
+unique_countries = []
+for i in countries:
+  if i not in unique_countries:
+      unique_countries.append(i)
 
 length = len(better_keywords)
 news_keyword_string = ""
@@ -150,7 +185,7 @@ google_keyword_string = google_keyword_string[:-1]
 
 related_articles = []
 
-for country in countries:
+for country in unique_countries:
     related_article_arr = get_related_stories(country, url)
     related_articles.append(related_article_arr)
 
