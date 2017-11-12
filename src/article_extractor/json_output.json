@@ -1,0 +1,30 @@
+{
+"related_articles": [
+  {
+    "newspaper": {
+        "name": "New York Times",
+        "link": "https://nytimes.com",
+        "location": "United States"
+    },
+    "article": {
+      "headline": "Same Headline",
+      "location": "United States",
+      "link": "https://nytimes.com/thisarticle",
+      "date": "2012-04-23T18:25:43Z"
+    }
+  },
+  {
+    "newspaper": {
+        "name": "New York Times",
+        "link": "https://nytimes.com",
+        "location": "United States"
+    },
+    "article": {
+      "headline": "Same Headline",
+      "location": "United States",
+      "link": "https://nytimes.com/thisarticle",
+      "date": "2012-04-23T18:25:43Z"
+    }
+  }
+]
+}
