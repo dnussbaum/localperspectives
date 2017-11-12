@@ -1,6 +1,7 @@
 {
 "google_news_url": "https://news.google.com/news/search/section/q/Trump%20immigration",
 "google_url": "https://google.com/s/???",
+"keywords": ["trump","keyword2"],
 "related_articles": [
   {
     "newspaper": {

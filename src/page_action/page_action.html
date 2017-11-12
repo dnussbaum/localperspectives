@@ -3,33 +3,77 @@
 <head>
 <style type="text/css">
 	#mainPopup {
-		padding: 10px;
-		height: 200px;
 		width: 400px;
 		font-family: "Palatino", Georgia, Times, Serif;
+		background: #e8e1cb;
+	}
+
+	.list-group-item {
+		background: #f8f5e8 !important;
+	}
+
+	#header {
+		background: #fff;
+		margin-top: -10px;
+		margin-bottom: 10px;
+		padding:10px;
+	}
+
+	#footer {
+		background: #fff;
+		padding:10px;
+	}
+
+	.content {
+		padding: 0 10px;
+	}
+
+	.keyword {
+		margin-left:5px;
 	}
 </style>
 <script src="/js/jquery-3.2.1.min.js"></script>
+<script src="/js/angular.min.js"></script>
 <script src="popup.js"></script>
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
-
-<div id="mainPopup">
-	<h1>Local Perspectives</h1>
-	<div class="list-group">
-		<div class="list-group-item">
-			<h4 class="list-group-item-heading">Article</h4>
-			<p class="list-group-item-text">...</p>
+<body ng-app="mainpopup">
+<div ng-controller="popupCtrl" id="mainPopup">
+	<div id="header" class="row">
+		<div class="col-xs-12">
+			<h1><i class="fa fa-compass"></i> Local Perspectives</h1>
 		</div>
-		<div class="list-group-item">
-			<h4 class="list-group-item-heading">Article</h4>
-			<p class="list-group-item-text">...</p>
+	</div>
+	<div class="content row">
+		<div class="col-xs-12">
+		<div class="list-group">
+			<a ng-href="{{a.article.link}}" target="_blank" ng-repeat="a in payload.related_articles" class="list-group-item">
+				<h4 class="list-group-item-heading">{{a.article.headline}}</h4>
+				<p class="list-group-item-text">{{a.newspaper.name}} | {{format_date(a.article.date)}} | {{a.newspaper.location}}</p>
+			</a>
 		</div>
-		<div class="list-group-item">
-			<h4 class="list-group-item-heading">Article</h4>
-			<p class="list-group-item-text">...</p>
+	</div>
+	</div>
+	<div class="content row">
+		<div class="col-xs-6">
+			<a href="{{payload.google_news_url}}" target="_blank" class="btn btn-block btn-default">
+				<i class="fa fa-newspaper-o"></i>&nbsp; Google News Search
+			</a>
+		</div>
+		<div class="col-xs-6">
+			<a href="{{payload.google_url}}" target="_blank" class="btn btn-block btn-default">
+				<i class="fa fa-google"></i>&nbsp; Google Search
+			</a>
+		</div>
+	</div>
+	<br>
+	<div id="footer" class="row">
+		<div class="col-xs-12">
+			<div>Keywords Used</div>
+			<span ng-repeat="keyword in payload.keywords" class="label label-default keyword">{{keyword}}</span>
 		</div>
 	</div>
 </div>
-
+</body>
 </html>

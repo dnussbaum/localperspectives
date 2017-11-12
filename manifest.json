@@ -20,7 +20,7 @@
     "default_popup": "src/page_action/page_action.html"
   },
   "permissions": [
-    "https://*/*"
+    "https://*/*","tabs"
   ],
   "content_scripts": [
     {
