@@ -18,28 +18,34 @@ pp = pprint.PrettyPrinter(indent=4)
 
 # Takes in a URL
 # returns hte article title, some keywords, and a summary
-def extract_article_features(url="http://www.cnn.com/2017/10/25/politics/north-korea-us-hydrogen-bomb-threat/index.html"):
+def extract_article_features(url):
     article = Article(url, language='en')
     article.download()
     article.parse()
     article.nlp()
 
-    return (article.title, article.keywords, article.summary, article.text)
+    return (article.text, article.publish_date, article.title)
 
-def cleanAritlce(article):
-    a = article.replace("\u", "")
-    return a
+def cleanWord(word):
+    w = word.replace(".", "")
+    w = w.replace("\"", "")
+    w = w.replace("'s", "")
+    w = w.replace(":", "")
+    w = w.replace(";", "")
+
+    return w
 
 def extract_key_words(article):
 
     words = article.split()
     new_words = []
     for w in words:
-        new_words.append(w.encode('utf-8'))
+        new_word = w.encode('utf-8')
+        new_word = cleanWord(new_word)
+        new_words.append(new_word)
 
     words = new_words
     words = map(str, words)
-    #words = map(stripx, words)
 
     #tagged = pos_tag(words)
     #propernouns = [word for word,pos in tagged if pos == 'NNP']
@@ -61,7 +67,7 @@ def extract_location_from_text(text):
 
 # Takes in keywords and location
 # returns list of related articles
-def get_related_stories(keywords, text, location, url, headline):
+def get_related_stories(location, url):
     # Configure API key authorization: app_id
     aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '50b90058'
     # Configure API key authorization: app_key
@@ -70,25 +76,11 @@ def get_related_stories(keywords, text, location, url, headline):
     # create an instance of the API class
     api_instance = aylien_news_api.DefaultApi()
 
-    keyword_string = ""
-    length = len(keywords)
-    for i in range(length):
-        k = keywords[i]
-        keyword_string += k
-        if i < 1:
-            keyword_string += " || "
-        else:
-            keyword_string += " || "
-
-
-    keyword_string = keyword_string[:-4]
-    print(keyword_string)
-
     opts = {
       'language': ['en'],
-      'published_at_start': 'NOW-7DAYS',
+      'published_at_start': 'NOW-14DAYS',
       'published_at_end': 'NOW',
-      'source_scopes_country': ['SA'],
+      'source_scopes_country': [location],
       'story_url': url
     }
 
@@ -96,28 +88,78 @@ def get_related_stories(keywords, text, location, url, headline):
         # List stories
         api_response = api_instance.list_related_stories(**opts)
         stories = []
+
         for story in api_response.related_stories:
-          the_story = {
-            "title": story.title,
-            "url": story.links.permalink,
-            "source": story.source.name,
-            "locations": story.source.locations
+
+          locations = story.source.locations
+
+          np = {
+            "name": story.source.name,
+            "location": "" if len(locations) == 0 else locations[0].country
           }
-          stories.append(the_story)
+
+          link = story.links.permalink
+          t, d, title = extract_article_features(link)
+
+          article = {
+            "headline": story.title,
+            "location": "" if len(locations) == 0 else locations[0].country,
+            "link": link,
+            "date": "" if d is None else str(d)
+
+          }
+
+          obj = {
+            "article": article,
+            "newspaper": np
+          }
+
+          stories.append(obj)
         return stories
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-url = "http://www.cnn.com/2017/11/04/middleeast/saudi-government-anti-corruption-committee/index.html"
-title, keywords, summary, text = extract_article_features(url)
+url = "https://www.thenational.ae/world/gcc/saudi-arabia-arrests-princes-ministers-and-business-figures-in-anti-corruption-crackdown-1.673073"
+org_text, org_date, title = extract_article_features(url)
+text = title + " " + title + " " + title + " " + org_text
+
 better_keywords = extract_key_words(text)
 
 countries_output = extract_location_from_text(text)
+
 countries = []
 for country in countries_output:
     isocode = pycountry.countries.get(name=country[0]).alpha_2
     countries.append(isocode)
 
-print better_keywords, keywords, countries
+print(countries_output)
 
-print(get_related_stories(better_keywords, text, countries, url, title))
+length = len(better_keywords)
+news_keyword_string = ""
+google_keyword_string = ""
+
+for i in range(length):
+    k = better_keywords[i]
+    news_keyword_string += k
+    news_keyword_string += "%20"
+    google_keyword_string += k
+    google_keyword_string += "+"
+
+news_keyword_string = news_keyword_string[:-3]
+google_keyword_string = google_keyword_string[:-1]
+
+related_articles = []
+
+for country in countries:
+    related_article_arr = get_related_stories(country, url)
+    related_articles.append(related_article_arr)
+
+json = {
+    "google_news_url":"https://news.google.com/news/search/section/q/" + news_keyword_string,
+    "google_url":"https://google.com/search?q=" + google_keyword_string,
+    "related_articles": related_articles,
+    "keywords": better_keywords
+
+}
+
+print(json)
