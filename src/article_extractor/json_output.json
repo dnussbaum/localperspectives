@@ -1,0 +1,32 @@
+{
+"google_news_url": "https://news.google.com/news/search/section/q/Trump%20immigration",
+"google_url": "https://google.com/s/???",
+"related_articles": [
+  {
+    "newspaper": {
+        "name": "New York Times",
+        "link": "https://nytimes.com",
+        "location": "United States"
+    },
+    "article": {
+      "headline": "Same Headline",
+      "location": "United States",
+      "link": "https://nytimes.com/thisarticle",
+      "date": "2012-04-23T18:25:43Z"
+    }
+  },
+  {
+    "newspaper": {
+        "name": "New York Times",
+        "link": "https://nytimes.com",
+        "location": "United States"
+    },
+    "article": {
+      "headline": "Same Headline",
+      "location": "United States",
+      "link": "https://nytimes.com/thisarticle",
+      "date": "2012-04-23T18:25:43Z"
+    }
+  }
+]
+}
