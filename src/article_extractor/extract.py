@@ -63,9 +63,9 @@ def extract_location_from_text(text):
 # returns list of related articles
 def get_related_stories(keywords, text, location, url, headline):
     # Configure API key authorization: app_id
-    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '05d67d01'
+    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '50b90058'
     # Configure API key authorization: app_key
-    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = 'a2a649ad010cbfd18ec4d17271d5a247'
+    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = '8403356a759375e9093e204457f77b94'
 
     # create an instance of the API class
     api_instance = aylien_news_api.DefaultApi()
@@ -88,7 +88,7 @@ def get_related_stories(keywords, text, location, url, headline):
       'language': ['en'],
       'published_at_start': 'NOW-7DAYS',
       'published_at_end': 'NOW',
-      'source_scopes_country': ['US'],
+      'source_scopes_country': ['SA'],
       'story_url': url
     }
 
@@ -108,7 +108,7 @@ def get_related_stories(keywords, text, location, url, headline):
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-url = "https://www.japantimes.co.jp/news/2017/11/01/world/politics-diplomacy-world/trump-faults-schumer-diversity-immigration-new-york-city-attack/#.Wfp5H7b-2u4"
+url = "http://www.cnn.com/2017/11/04/middleeast/saudi-government-anti-corruption-committee/index.html"
 title, keywords, summary, text = extract_article_features(url)
 better_keywords = extract_key_words(text)
 
@@ -118,6 +118,6 @@ for country in countries_output:
     isocode = pycountry.countries.get(name=country[0]).alpha_2
     countries.append(isocode)
 
-#print better_keywords, keywords, countries
+print better_keywords, keywords, countries
 
-print(get_related_stories(better_keywords, text, [countries[0]], url, title))
+print(get_related_stories(better_keywords, text, countries, url, title))
