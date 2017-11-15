@@ -3,69 +3,198 @@ import aylien_news_api
 from aylien_news_api.rest import ApiException
 import pprint
 import geograpy
+import pycountry
 from geograpy import places
+from collections import Counter
+
 import nltk
+from nltk.corpus import stopwords
+from nltk.tag import pos_tag
+
+stop_words = set(stopwords.words('english'))
+additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed", "according", "know", "new"]
 
 pp = pprint.PrettyPrinter(indent=4)
 
 # Takes in a URL
 # returns hte article title, some keywords, and a summary
-def extract_article_features(url="http://www.cnn.com/2017/10/25/politics/north-korea-us-hydrogen-bomb-threat/index.html"):
+def extract_article_features(url):
     article = Article(url, language='en')
     article.download()
     article.parse()
     article.nlp()
 
-    return (article.title, article.keywords, article.summary, article.text)
+    return (article.text, article.publish_date, article.title)
 
+def cleanWord(word):
+    w = word.replace(".", "")
+    w = w.replace("\"", "")
+    w = w.replace("'s", "")
+    w = w.replace(":", "")
+    w = w.replace(";", "")
+
+    return w
+
+def extract_key_words(article):
+
+    words = article.split()
+    new_words = []
+    for w in words:
+        new_word = w.encode('utf-8')
+        new_word = cleanWord(new_word)
+        new_words.append(new_word)
+
+    words = new_words
+    words = map(str, words)
+
+    #tagged = pos_tag(words)
+    #propernouns = [word for word,pos in tagged if pos == 'NNP']
+
+    keywords = Counter(words).most_common()
+
+    good_keywords = []
+    for w in keywords:
+        word = w[0]
+        if (word.lower() not in stop_words) and (word not in additional_stop_words):
+            good_keywords.append(word)
+
+    return good_keywords[0:10]
 
 def extract_location_from_text(text):
     #https://stackoverflow.com/questions/40517720/python-geograpy-unable-to-run-demo
     places = geograpy.get_place_context(text=text)
-    return places.city_mentions
+    return places.country_mentions
+
+one_word_countries = {
+  "Saudi" : "Saudi Arabia",
+  "Korea": "South Korea",
+  "Emirates" : "United Arab Emirates",
+  "Britian" : "Great Britain"
+}
+
+def searchForCountries(text):
+    countries = dict()
+    words = text.split()
+    for word in words:
+        if word in one_word_countries.keys():
+            if countries.get(word) is None:
+                countries[word] = 0
+            else:
+                countries[word] += 1
+
+    c = countries.keys()
+    toreturn = []
+
+    for country in c:
+        toreturn.append((one_word_countries.get(country), 1))
+
+    return toreturn
 
 # Takes in keywords and location
 # returns list of related articles
-def get_related_stories(headline, text, location):
+def get_related_stories(location, url):
     # Configure API key authorization: app_id
-    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '05d67d01'
+    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '50b90058'
     # Configure API key authorization: app_key
-    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = 'a2a649ad010cbfd18ec4d17271d5a247'
+    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = '8403356a759375e9093e204457f77b94'
 
     # create an instance of the API class
     api_instance = aylien_news_api.DefaultApi()
 
     opts = {
-      'sort_by': 'social_shares_count.facebook',
       'language': ['en'],
       'published_at_start': 'NOW-7DAYS',
       'published_at_end': 'NOW',
-      'source_scopes_city': location,
-      'story_body': text,
-      'story_title': headline
+      'source_scopes_country': [location],
+      'story_url': url
     }
 
     try:
         # List stories
-        api_response = api_instance.list_stories(**opts)
+        api_response = api_instance.list_related_stories(**opts)
         stories = []
-        for story in api_response.stories:
-          the_story = {
-            "title": story.title,
-            "url": story.links.permalink,
-            "source": story.source.name,
-            "locations": story.source.locations
+
+        for story in api_response.related_stories:
+
+          locations = story.source.locations
+
+          np = {
+            "name": story.source.name,
+            "location": "" if len(locations) == 0 else locations[0].country
           }
-          stories.append(the_story)
+
+          link = story.links.permalink
+          t, d, title = extract_article_features(link)
+
+          article = {
+            "headline": story.title,
+            "location": "" if len(locations) == 0 else locations[0].country,
+            "link": link,
+            "date": "" if d is None else str(d)
+
+          }
+
+          obj = {
+            "article": article,
+            "newspaper": np
+          }
+
+          stories.append(obj)
         return stories
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-title, keywords, summary, text = extract_article_features("http://www.businessinsider.com/rahm-emanuel-on-chicago-and-health-tech-2017-9")
-cities_output = extract_location_from_text(text)
-cities = []
-for city in cities_output:
-    cities.append(city[0])
-print keywords, cities
+url = "http://www.cnn.com/2017/11/04/middleeast/saudi-government-anti-corruption-committee/index.html"
+org_text, org_date, title = extract_article_features(url)
+text = title + " " + org_text
 
-print(get_related_stories(title, text, [cities[0]]))
+better_keywords = extract_key_words(text)
+
+countries_output = extract_location_from_text(text)
+
+countries = []
+
+oneword = searchForCountries(text)
+
+if len(oneword) > 0:
+    countries_output += oneword
+
+
+for country in countries_output:
+    isocode = pycountry.countries.get(name=country[0]).alpha_2
+    countries.append(isocode)
+
+unique_countries = []
+for i in countries:
+  if i not in unique_countries:
+      unique_countries.append(i)
+
+length = len(better_keywords)
+news_keyword_string = ""
+google_keyword_string = ""
+
+for i in range(length):
+    k = better_keywords[i]
+    news_keyword_string += k
+    news_keyword_string += "%20"
+    google_keyword_string += k
+    google_keyword_string += "+"
+
+news_keyword_string = news_keyword_string[:-3]
+google_keyword_string = google_keyword_string[:-1]
+
+related_articles = []
+
+for country in unique_countries:
+    related_article_arr = get_related_stories(country, url)
+    related_articles.append(related_article_arr)
+
+json = {
+    "google_news_url":"https://news.google.com/news/search/section/q/" + news_keyword_string,
+    "google_url":"https://google.com/search?q=" + google_keyword_string,
+    "related_articles": related_articles,
+    "keywords": better_keywords
+
+}
+
+print(json)
