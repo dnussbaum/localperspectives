@@ -3,8 +3,8 @@
 <head>
 <style type="text/css">
 	#mainPopup {
-		width: 400px;
-		font-family: "Palatino", Georgia, Times, Serif;
+		width: 700px;
+		font-family: 'Barlow Condensed', sans-serif;
 		background: #e8e1cb;
 	}
 
@@ -13,14 +13,23 @@
 	}
 
 	#header {
-		background: #fff;
+		background: #002f4a;
+		color: #fff;
 		margin-top: -10px;
 		margin-bottom: 10px;
 		padding:10px;
+		font-family: 'Barlow Condensed', sans-serif;
+		text-transform: uppercase;
+		font-weight: 900;
+	}
+
+	.list-group-item-heading {
+		font-family: "Lora", Georgia, Times, Serif;
 	}
 
 	#footer {
-		background: #fff;
+		background: #002f4a;
+		color: #fff;
 		padding:10px;
 	}
 
@@ -30,11 +39,19 @@
 
 	.keyword {
 		margin-left:5px;
+		background: #e8e1cb !important;
+		color: #002f4a !important;
+	}
+
+	.btn-default {
+		background: #002f4a !important;
+		color: #fff !important;
 	}
 </style>
 <script src="/js/jquery-3.2.1.min.js"></script>
 <script src="/js/angular.min.js"></script>
 <script src="popup.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Barlow+Condensed|Lora" rel="stylesheet">
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
@@ -48,7 +65,7 @@
 	<div class="content row">
 		<div class="col-xs-12">
 		<div class="list-group">
-			<a ng-href="{{a.article.link}}" target="_blank" ng-repeat="a in payload.related_articles" class="list-group-item">
+			<a tabindex="-1" ng-href="{{a.article.link}}" target="_blank" ng-repeat="a in payload.related_articles" class="list-group-item">
 				<h4 class="list-group-item-heading">{{a.article.headline}}</h4>
 				<p class="list-group-item-text">{{a.newspaper.name}} | {{format_date(a.article.date)}} | {{a.newspaper.location}}</p>
 			</a>
@@ -57,12 +74,12 @@
 	</div>
 	<div class="content row">
 		<div class="col-xs-6">
-			<a href="{{payload.google_news_url}}" target="_blank" class="btn btn-block btn-default">
+			<a tabindex="-1" href="{{payload.google_news_url}}" target="_blank" class="btn btn-block btn-default">
 				<i class="fa fa-newspaper-o"></i>&nbsp; Google News Search
 			</a>
 		</div>
 		<div class="col-xs-6">
-			<a href="{{payload.google_url}}" target="_blank" class="btn btn-block btn-default">
+			<a tabindex="-1" href="{{payload.google_url}}" target="_blank" class="btn btn-block btn-default">
 				<i class="fa fa-google"></i>&nbsp; Google Search
 			</a>
 		</div>

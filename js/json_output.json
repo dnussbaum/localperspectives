@@ -1,32 +1,32 @@
 {
-"google_news_url": "https://news.google.com/news/search/section/q/Trump%20immigration",
-"google_url": "https://google.com/s/???",
-"keywords": ["trump","keyword2"],
+"google_news_url": "https://news.google.com/news/search/section/q/iran%20iraq%20earthquake/iran%20iraq%20earthquake?gl=US&ned=us&hl=en",
+"google_url": "https://www.google.com/search?q=iran+iraq+earthquake",
+"keywords": ["Iraq","Iran", "earthquake"],
 "related_articles": [
   {
     "newspaper": {
-        "name": "New York Times",
-        "link": "https://nytimes.com",
-        "location": "United States"
+        "name": "Al Jazeera",
+        "link": "http://www.aljazeera.com",
+        "location": "Doha, Qatar"
     },
     "article": {
-      "headline": "Same Headline",
-      "location": "United States",
-      "link": "https://nytimes.com/thisarticle",
-      "date": "2012-04-23T18:25:43Z"
+      "headline": "Iran-Iraq earthquake: More than 140 die in heavy tremor",
+      "location": "Doha, Qatar",
+      "link": "http://www.aljazeera.com/news/2017/11/northern-iraq-rocked-72-magnitude-earthquake-171112184114150.html",
+      "date": "2017-11-13"
     }
   },
   {
     "newspaper": {
-        "name": "New York Times",
-        "link": "https://nytimes.com",
-        "location": "United States"
+        "name": "Tehran Times",
+        "link": "http://www.tehrantimes.com/",
+        "location": "Tehran, Iran"
     },
     "article": {
-      "headline": "Same Headline",
-      "location": "United States",
-      "link": "https://nytimes.com/thisarticle",
-      "date": "2012-04-23T18:25:43Z"
+      "headline": "Strong earthquake hits Iran-Iraq border, kills 145",
+      "location": "Tehran, Iran",
+      "link": "http://www.tehrantimes.com/news/418440/Strong-earthquake-hits-Iran-Iraq-border-kills-145",
+      "date": "2017-11-13"
     }
   }
 ]
