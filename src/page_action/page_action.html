@@ -47,6 +47,11 @@
 		background: #002f4a !important;
 		color: #fff !important;
 	}
+
+	.articles {
+		max-height: 300px;
+		overflow-y: scroll;
+	}
 </style>
 <script src="/js/jquery-3.2.1.min.js"></script>
 <script src="/js/angular.min.js"></script>
@@ -62,7 +67,12 @@
 			<h1><i class="fa fa-compass"></i> Local Perspectives</h1>
 		</div>
 	</div>
-	<div class="content row">
+	<div ng-hide="payload.related_articles" class="content row">
+		<div class="col-md-12">
+			Related Stories Loading...
+		</div>
+	</div>
+	<div ng-show="payload.related_articles" class="content row articles">
 		<div class="col-xs-12">
 		<div class="list-group">
 			<a tabindex="-1" ng-href="{{a.article.link}}" target="_blank" ng-repeat="a in payload.related_articles" class="list-group-item">
@@ -72,7 +82,8 @@
 		</div>
 	</div>
 	</div>
-	<div class="content row">
+	<br>
+	<div ng-show="payload.related_articles" class="content row">
 		<div class="col-xs-6">
 			<a tabindex="-1" href="{{payload.google_news_url}}" target="_blank" class="btn btn-block btn-default">
 				<i class="fa fa-newspaper-o"></i>&nbsp; Google News Search
@@ -85,7 +96,7 @@
 		</div>
 	</div>
 	<br>
-	<div id="footer" class="row">
+	<div ng-show="payload.related_articles" id="footer" class="row">
 		<div class="col-xs-12">
 			<div>Keywords Used</div>
 			<span ng-repeat="keyword in payload.keywords" class="label label-default keyword">{{keyword}}</span>

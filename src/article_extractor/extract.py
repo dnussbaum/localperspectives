@@ -6,6 +6,7 @@ import geograpy
 import pycountry
 from geograpy import places
 from collections import Counter
+import json
 
 import nltk
 from nltk.corpus import stopwords
@@ -65,14 +66,14 @@ def extract_location_from_text(text):
     places = geograpy.get_place_context(text=text)
     return places.country_mentions
 
-one_word_countries = {
-  "Saudi" : "Saudi Arabia",
-  "Korea": "South Korea",
-  "Emirates" : "United Arab Emirates",
-  "Britian" : "Great Britain"
-}
-
 def searchForCountries(text):
+    one_word_countries = {
+      "Saudi" : "Saudi Arabia",
+      "Korea": "South Korea",
+      "Emirates" : "United Arab Emirates",
+      "Britian" : "Great Britain"
+    }
+
     countries = dict()
     words = text.split()
     for word in words:
@@ -144,57 +145,56 @@ def get_related_stories(location, url):
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
 
-url = "http://www.cnn.com/2017/11/04/middleeast/saudi-government-anti-corruption-committee/index.html"
-org_text, org_date, title = extract_article_features(url)
-text = title + " " + org_text
+def get_json(url):
+    org_text, org_date, title = extract_article_features(url)
+    text = title + " " + org_text
 
-better_keywords = extract_key_words(text)
+    better_keywords = extract_key_words(text)
 
-countries_output = extract_location_from_text(text)
+    countries_output = extract_location_from_text(text)
 
-countries = []
+    countries = []
 
-oneword = searchForCountries(text)
+    oneword = searchForCountries(text)
 
-if len(oneword) > 0:
-    countries_output += oneword
+    if len(oneword) > 0:
+        countries_output += oneword
 
 
-for country in countries_output:
-    isocode = pycountry.countries.get(name=country[0]).alpha_2
-    countries.append(isocode)
+    for country in countries_output:
+        isocode = pycountry.countries.get(name=country[0]).alpha_2
+        countries.append(isocode)
 
-unique_countries = []
-for i in countries:
-  if i not in unique_countries:
-      unique_countries.append(i)
+    unique_countries = []
+    for i in countries:
+      if i not in unique_countries:
+          unique_countries.append(i)
 
-length = len(better_keywords)
-news_keyword_string = ""
-google_keyword_string = ""
+    length = len(better_keywords)
+    news_keyword_string = ""
+    google_keyword_string = ""
 
-for i in range(length):
-    k = better_keywords[i]
-    news_keyword_string += k
-    news_keyword_string += "%20"
-    google_keyword_string += k
-    google_keyword_string += "+"
+    for i in range(length):
+        k = better_keywords[i]
+        news_keyword_string += k
+        news_keyword_string += "%20"
+        google_keyword_string += k
+        google_keyword_string += "+"
 
-news_keyword_string = news_keyword_string[:-3]
-google_keyword_string = google_keyword_string[:-1]
+    news_keyword_string = news_keyword_string[:-3]
+    google_keyword_string = google_keyword_string[:-1]
 
-related_articles = []
+    related_articles = []
 
-for country in unique_countries:
-    related_article_arr = get_related_stories(country, url)
-    related_articles.append(related_article_arr)
+    for country in unique_countries:
+        related_article_arr = get_related_stories(country, url)
+        related_articles += related_article_arr
 
-json = {
-    "google_news_url":"https://news.google.com/news/search/section/q/" + news_keyword_string,
-    "google_url":"https://google.com/search?q=" + google_keyword_string,
-    "related_articles": related_articles,
-    "keywords": better_keywords
+    json_obj = {
+        "google_news_url":"https://news.google.com/news/search/section/q/" + news_keyword_string,
+        "google_url":"https://google.com/search?q=" + google_keyword_string,
+        "related_articles": related_articles,
+        "keywords": better_keywords
+    }
 
-}
-
-print(json)
+    return json_obj
