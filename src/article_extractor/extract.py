@@ -116,12 +116,12 @@ def get_related_stories(location, url, t, d, title):
 
           np = {
             "name": story.source.name,
-            "location": "" if len(locations) == 0 else locations[0].country
+            "location": "" if len(locations) == 0 else pycountry.countries.get(alpha_2=locations[0].country).name
           }
 
           article = {
             "headline": story.title,
-            "location": "" if len(locations) == 0 else locations[0].country,
+            "location": "" if len(locations) == 0 else pycountry.countries.get(alpha_2=locations[0].country).name,
             "link": story.links.permalink,
             "date": "" if d is None else str(d)
 
@@ -136,59 +136,6 @@ def get_related_stories(location, url, t, d, title):
         return stories
     except ApiException as e:
         print("Exception when calling DefaultApi->list_stories: %s\n" % e)
-
-def get_json(url):
-    org_text, org_date, title = extract_article_features(url)
-    text = title + " " + org_text
-
-    better_keywords = extract_keywords(text)
-
-    countries_output = extract_location_from_text(text)
-
-    countries = []
-
-    oneword = searchForCountries(text)
-
-    if len(oneword) > 0:
-        countries_output += oneword
-
-    for country in countries_output:
-        isocode = pycountry.countries.get(name=country[0]).alpha_2
-        countries.append(isocode)
-
-    unique_countries = []
-    for i in countries:
-      if i not in unique_countries:
-          unique_countries.append(i)
-
-    length = len(better_keywords)
-    news_keyword_string = ""
-    google_keyword_string = ""
-
-    for i in range(length):
-        k = better_keywords[i]
-        news_keyword_string += k
-        news_keyword_string += "%20"
-        google_keyword_string += k
-        google_keyword_string += "+"
-
-    news_keyword_string = news_keyword_string[:-3]
-    google_keyword_string = google_keyword_string[:-1]
-
-    related_articles = []
-
-    for country in unique_countries:
-        related_article_arr = get_related_stories(country, url, org_text, org_date, title)
-        related_articles += related_article_arr
-
-    json_obj = {
-        "google_news_url":"https://news.google.com/news/search/section/q/" + news_keyword_string,
-        "google_url":"https://google.com/search?q=" + google_keyword_string,
-        "related_articles": related_articles,
-        "keywords": better_keywords
-    }
-
-    return json_obj
 
 def get_locations(url):
     org_text, org_date, title = extract_article_features(url)
