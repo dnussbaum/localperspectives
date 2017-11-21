@@ -15,7 +15,13 @@ from nltk.tag import pos_tag
 stop_words = set(stopwords.words('english'))
 additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed", "according", "know", "new"]
 
-pp = pprint.PrettyPrinter(indent=4)
+# Configure API key authorization: app_id
+aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '50b90058'
+# Configure API key authorization: app_key
+aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = '8403356a759375e9093e204457f77b94'
+
+# create an instance of the API class
+api_instance = aylien_news_api.DefaultApi()
 
 # Takes in a URL
 # returns hte article title, some keywords, and a summary
@@ -36,8 +42,7 @@ def cleanWord(word):
 
     return w
 
-def extract_key_words(article):
-
+def extract_keywords(article):
     words = article.split()
     new_words = []
     for w in words:
@@ -47,9 +52,6 @@ def extract_key_words(article):
 
     words = new_words
     words = map(str, words)
-
-    #tagged = pos_tag(words)
-    #propernouns = [word for word,pos in tagged if pos == 'NNP']
 
     keywords = Counter(words).most_common()
 
@@ -93,14 +95,7 @@ def searchForCountries(text):
 
 # Takes in keywords and location
 # returns list of related articles
-def get_related_stories(location, url):
-    # Configure API key authorization: app_id
-    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '50b90058'
-    # Configure API key authorization: app_key
-    aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = '8403356a759375e9093e204457f77b94'
-
-    # create an instance of the API class
-    api_instance = aylien_news_api.DefaultApi()
+def get_related_stories(location, url, t, d, title):
 
     opts = {
       'language': ['en'],
@@ -124,13 +119,10 @@ def get_related_stories(location, url):
             "location": "" if len(locations) == 0 else locations[0].country
           }
 
-          link = story.links.permalink
-          t, d, title = extract_article_features(link)
-
           article = {
             "headline": story.title,
             "location": "" if len(locations) == 0 else locations[0].country,
-            "link": link,
+            "link": story.links.permalink,
             "date": "" if d is None else str(d)
 
           }
@@ -149,7 +141,7 @@ def get_json(url):
     org_text, org_date, title = extract_article_features(url)
     text = title + " " + org_text
 
-    better_keywords = extract_key_words(text)
+    better_keywords = extract_keywords(text)
 
     countries_output = extract_location_from_text(text)
 
@@ -159,7 +151,6 @@ def get_json(url):
 
     if len(oneword) > 0:
         countries_output += oneword
-
 
     for country in countries_output:
         isocode = pycountry.countries.get(name=country[0]).alpha_2
@@ -187,7 +178,7 @@ def get_json(url):
     related_articles = []
 
     for country in unique_countries:
-        related_article_arr = get_related_stories(country, url)
+        related_article_arr = get_related_stories(country, url, org_text, org_date, title)
         related_articles += related_article_arr
 
     json_obj = {
@@ -195,6 +186,64 @@ def get_json(url):
         "google_url":"https://google.com/search?q=" + google_keyword_string,
         "related_articles": related_articles,
         "keywords": better_keywords
+    }
+
+    return json_obj
+
+def get_locations(url):
+    org_text, org_date, title = extract_article_features(url)
+    text = title + " " + org_text
+
+    better_keywords = extract_keywords(text)
+
+    countries_output = extract_location_from_text(text)
+
+    countries = []
+
+    oneword = searchForCountries(text)
+
+    if len(oneword) > 0:
+        countries_output += oneword
+
+    for country in countries_output:
+        isocode = pycountry.countries.get(name=country[0]).alpha_2
+        countries.append(isocode)
+
+    unique_countries = []
+    for i in countries:
+      if i not in unique_countries:
+          unique_countries.append(i)
+
+    length = len(better_keywords)
+    news_keyword_string = ""
+    google_keyword_string = ""
+
+    for i in range(length):
+        k = better_keywords[i]
+        news_keyword_string += k
+        news_keyword_string += "%20"
+        google_keyword_string += k
+        google_keyword_string += "+"
+
+    news_keyword_string = news_keyword_string[:-3]
+    google_keyword_string = google_keyword_string[:-1]
+
+    json_obj = {
+        "google_news_url":"https://news.google.com/news/search/section/q/" + news_keyword_string,
+        "google_url":"https://google.com/search?q=" + google_keyword_string,
+        "keywords": better_keywords,
+        "locations": unique_countries,
+        "related_articles": []
+    }
+
+    return json_obj
+
+def get_articles(url, country):
+    org_text, org_date, title = extract_article_features(url)
+    related_article_arr = get_related_stories(country, url, org_text, org_date, title)
+
+    json_obj = {
+        "related_articles": related_article_arr,
     }
 
     return json_obj
