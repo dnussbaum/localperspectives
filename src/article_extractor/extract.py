@@ -15,15 +15,10 @@ from nltk.tag import pos_tag
 stop_words = set(stopwords.words('english'))
 additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed", "according", "know", "new"]
 
-# Configure API key authorization: app_id
-aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = '50b90058'
-# Configure API key authorization: app_key
-aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = '8403356a759375e9093e204457f77b94'
-
-# create an instance of the API class
+aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = 'cc9b2667'
+aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = 'd29b83d79b0efab512be90374de8f797'
 api_instance = aylien_news_api.DefaultApi()
 
-# Takes in a URL
 # returns hte article title, some keywords, and a summary
 def extract_article_features(url):
     article = Article(url, language='en')
@@ -73,7 +68,8 @@ def searchForCountries(text):
       "Saudi" : "Saudi Arabia",
       "Korea": "South Korea",
       "Emirates" : "United Arab Emirates",
-      "Britian" : "Great Britain"
+      "Britian" : "United Kingdom",
+      "Russia" : "Russian Federation"
     }
 
     countries = dict()
@@ -153,8 +149,11 @@ def get_locations(url):
         countries_output += oneword
 
     for country in countries_output:
-        isocode = pycountry.countries.get(name=country[0]).alpha_2
-        countries.append(isocode)
+        try:
+            isocode = pycountry.countries.get(name=country[0]).alpha_2
+            countries.append(isocode)
+        except:
+            pass
 
     unique_countries = []
     for i in countries:
