@@ -1,5 +1,3 @@
-var payload = chrome.extension.getBackgroundPage().payload;
-
 var app = angular.module("mainpopup", []);
 
 app.controller("popupCtrl", function($scope, $http) {

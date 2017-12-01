@@ -10,35 +10,12 @@
     "128": "icons/ico128.png"
   },
   "default_locale": "en",
-  "background": {
-    "page": "src/bg/background.html",
-    "persistent": true
-  },
   "browser_action": {
     "default_icon": "icons/ico19.png",
     "default_title": "Local Perspecitves",
     "default_popup": "src/page_action/page_action.html"
   },
   "permissions": [
-    "https://*/*","tabs"
-  ],
-  "content_scripts": [
-    {
-      "matches": [
-        "https://*/*"
-      ],
-      "css": [
-        "src/inject/inject.css"
-      ]
-    },
-    {
-      "matches": [
-        "https://*/*"
-      ],
-      "js": [
-        "js/jquery-3.2.1.min.js",
-        "src/inject/inject.js"
-      ]
-    }
+    "tabs"
   ]
 }
