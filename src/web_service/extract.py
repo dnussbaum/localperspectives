@@ -15,8 +15,9 @@ from nltk.tag import pos_tag
 stop_words = set(stopwords.words('english'))
 additional_stop_words = ["The", "Read", "More", "(CNN)", "CNN", "Among", "Story", "said", "review", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "must", "proposed", "according", "know", "new"]
 
-aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = 'cc9b2667'
-aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = 'd29b83d79b0efab512be90374de8f797'
+# Aylien API Keys Needed
+aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-ID'] = ""
+aylien_news_api.configuration.api_key['X-AYLIEN-NewsAPI-Application-Key'] = ""
 api_instance = aylien_news_api.DefaultApi()
 
 # returns hte article title, some keywords, and a summary
